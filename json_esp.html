@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SmartHome Pro</title>
+    <link rel="stylesheet" href="json_esp.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <button class="menu-btn" id="menuBtn">
+                <span class="material-icons">menu</span>
+            </button>
+            <h1 class="app-title">SmartHome</h1>
+        </div>
+        <div class="header-right">
+            <div class="status-badge" id="statusBadge">
+                <span class="dot"></span>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Side Menu -->
+    <div class="side-menu-overlay" id="sideMenuOverlay"></div>
+    <aside class="side-menu" id="sideMenu">
+        <div class="menu-header">
+            <span class="material-icons">memory</span>
+            <span>SmartHome Pro</span>
+        </div>
+        <nav class="menu-nav">
+            <button class="menu-item active" data-tab="lights">
+                <span class="material-icons">lightbulb</span> Lights
+            </button>
+            <button class="menu-item" data-tab="presets">
+                <span class="material-icons">auto_awesome</span> Presets
+            </button>
+            <button class="menu-item" data-tab="schedules">
+                <span class="material-icons">schedule</span> Schedules
+            </button>
+            <button class="menu-item" data-tab="settings">
+                <span class="material-icons">settings</span> Settings
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <!-- Lights Tab -->
+        <section class="tab-content active" id="tab-lights">
+            <div class="section-header">
+                <h2>Quick Presets</h2>
+            </div>
+            <div class="quick-presets" id="quickPresetsBar">
+                <button class="preset-chip" data-preset="all-on">
+                    <span class="material-icons">wb_sunny</span> All On
+                </button>
+                <button class="preset-chip" data-preset="all-off">
+                    <span class="material-icons">nightlight</span> All Off
+                </button>
+            </div>
+
+            <div class="section-header">
+                <h2>Main Lights</h2>
+            </div>
+            <div id="priorityContainer" class="lights-grid"></div>
+
+            <div class="section-header">
+                <h2>All GPIO Pins</h2>
+                <button class="collapse-btn" id="toggleGPIO">
+                    <span class="material-icons">expand_more</span>
+                </button>
+            </div>
+            <div id="standardContainer" class="gpio-grid"></div>
+        </section>
+
+        <!-- Presets Tab -->
+        <section class="tab-content" id="tab-presets">
+            <div class="section-header">
+                <h2>My Presets</h2>
+                <button class="add-btn" id="addPresetBtn">
+                    <span class="material-icons">add</span>
+                </button>
+            </div>
+            <div id="presetsContainer" class="presets-list"></div>
+        </section>
+
+        <!-- Schedules Tab -->
+        <section class="tab-content" id="tab-schedules">
+            <div class="section-header">
+                <h2>Scheduled Alarms</h2>
+                <button class="add-btn" id="addScheduleBtn">
+                    <span class="material-icons">add</span>
+                </button>
+            </div>
+            <div id="schedulesContainer" class="schedules-list"></div>
+        </section>
+
+        <!-- Settings Tab -->
+        <section class="tab-content" id="tab-settings">
+            <div class="settings-section">
+                <h3>Pin Configuration</h3>
+                <p class="settings-desc">Configure your GPIO pin names and types</p>
+                <button class="settings-btn" id="showWiringBtn">
+                    <span class="material-icons">developer_board</span>
+                    View Wiring Guide
+                </button>
+            </div>
+            <div class="settings-section">
+                <h3>Data Management</h3>
+                <button class="settings-btn danger" id="clearDataBtn">
+                    <span class="material-icons">delete_forever</span>
+                    Clear All Local Data
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="lights">
+            <span class="material-icons">lightbulb</span>
+            <span>Lights</span>
+        </button>
+        <button class="nav-item" data-tab="presets">
+            <span class="material-icons">auto_awesome</span>
+            <span>Presets</span>
+        </button>
+        <button class="nav-item" data-tab="schedules">
+            <span class="material-icons">schedule</span>
+            <span>Schedules</span>
+        </button>
+        <button class="nav-item" data-tab="settings">
+            <span class="material-icons">settings</span>
+            <span>Settings</span>
+        </button>
+    </nav>
+
+    <!-- Timer Modal -->
+    <div class="modal" id="timerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Set Timer</h3>
+                <button class="close-btn" data-close="timerModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle" id="timerPinName">GPIO Pin 5</p>
+                <div class="timer-options">
+                    <button class="timer-option" data-minutes="60">
+                        <span class="material-icons">schedule</span>
+                        <span>1 Hour</span>
+                    </button>
+                    <button class="timer-option" data-minutes="240">
+                        <span class="material-icons">schedule</span>
+                        <span>4 Hours</span>
+                    </button>
+                    <button class="timer-option" data-minutes="480">
+                        <span class="material-icons">schedule</span>
+                        <span>8 Hours</span>
+                    </button>
+                    <button class="timer-option" data-minutes="custom">
+                        <span class="material-icons">tune</span>
+                        <span>Custom</span>
+                    </button>
+                    <button class="timer-option cancel" data-minutes="0">
+                        <span class="material-icons">timer_off</span>
+                        <span>Cancel Timer</span>
+                    </button>
+                </div>
+                <div class="custom-timer-input" id="customTimerSection" style="display:none;">
+                    <label>Turn off after (minutes):</label>
+                    <input type="number" id="customMinutes" min="1" max="1440" value="30">
+                    <button class="primary-btn" id="setCustomTimerBtn">Set Timer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preset Editor Modal -->
+    <div class="modal" id="presetModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="presetModalTitle">Create Preset</h3>
+                <button class="close-btn" data-close="presetModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Preset Name</label>
+                    <input type="text" id="presetName" placeholder="e.g., Party Mode">
+                </div>
+                <div class="form-group">
+                    <label>Icon</label>
+                    <div class="icon-picker" id="iconPicker">
+                        <button class="icon-option selected" data-icon="celebration">
+                            <span class="material-icons">celebration</span>
+                        </button>
+                        <button class="icon-option" data-icon="nightlight">
+                            <span class="material-icons">nightlight</span>
+                        </button>
+                        <button class="icon-option" data-icon="movie">
+                            <span class="material-icons">movie</span>
+                        </button>
+                        <button class="icon-option" data-icon="restaurant">
+                            <span class="material-icons">restaurant</span>
+                        </button>
+                        <button class="icon-option" data-icon="eco">
+                            <span class="material-icons">eco</span>
+                        </button>
+                        <button class="icon-option" data-icon="bedtime">
+                            <span class="material-icons">bedtime</span>
+                        </button>
+                        <button class="icon-option" data-icon="work">
+                            <span class="material-icons">work</span>
+                        </button>
+                        <button class="icon-option" data-icon="bolt">
+                            <span class="material-icons">bolt</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Select Pins to Turn ON</label>
+                    <div class="pin-selector" id="pinSelector"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn" data-close="presetModal">Cancel</button>
+                <button class="primary-btn" id="savePresetBtn">Save Preset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Editor Modal -->
+    <div class="modal" id="scheduleModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="scheduleModalTitle">Create Schedule</h3>
+                <button class="close-btn" data-close="scheduleModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Schedule Name</label>
+                    <input type="text" id="scheduleName" placeholder="e.g., Morning Lights">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" id="scheduleTime" value="06:00">
+                    </div>
+                    <div class="form-group">
+                        <label>Action</label>
+                        <select id="scheduleAction">
+                            <option value="on">Turn ON</option>
+                            <option value="off">Turn OFF</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Repeat on Days</label>
+                    <div class="day-selector" id="daySelector">
+                        <button class="day-btn" data-day="0">Sun</button>
+                        <button class="day-btn selected" data-day="1">Mon</button>
+                        <button class="day-btn selected" data-day="2">Tue</button>
+                        <button class="day-btn selected" data-day="3">Wed</button>
+                        <button class="day-btn selected" data-day="4">Thu</button>
+                        <button class="day-btn selected" data-day="5">Fri</button>
+                        <button class="day-btn" data-day="6">Sat</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Select Pins</label>
+                    <div class="pin-selector" id="schedulePinSelector"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="secondary-btn" data-close="scheduleModal">Cancel</button>
+                <button class="primary-btn" id="saveScheduleBtn">Save Schedule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wiring Guide Modal -->
+    <div class="modal" id="wiringModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Wiring Guide</h3>
+                <button class="close-btn" data-close="wiringModal">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="instruction-text">Connect your devices to these GPIO pins:</p>
+                <div class="esp-visual-container">
+                    <div class="esp-board">
+                        <div class="usb-port"></div>
+                        <div class="wifi-chip">ESP-WROOM-32</div>
+                        <div class="pin-headers" id="visualPinHeader"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="primary-btn" data-close="wiringModal">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="material-icons" id="toastIcon">check_circle</span>
+        <span id="toastMessage">Action completed</span>
+    </div>
+
+    <script src="json_esp.js"></script>
+</body>
+
+</html>
